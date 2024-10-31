@@ -15,7 +15,7 @@
 <header class="sticky top-0 z-10 bg-white border-b shadow">
     <div class="flex justify-between items-center p-4 justify-center">
         <div class="flex items-center space-x-4">
-        <a href="{{route('index')}}"><i class="fas fa-home text-xl"></i>Trang chủ</a>
+        <a href="{{route('home')}}"><i class="fas fa-home text-xl"></i>Trang chủ</a>
             <a href="#" class="text-gray-600 hover:text-gray-800"><i class="fas fa-question-circle"></i> Giới thiệu</a>
             <div class="relative">
                 <button class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">

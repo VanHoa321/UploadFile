@@ -9,4 +9,5 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/download',[FileController::class, "index"])->name("index");
+Route::post('/upload', [FileController::class, 'store'])->name('upload');
 Route::get('/download/{id}', [FileController::class, 'download'])->name('download.file');
