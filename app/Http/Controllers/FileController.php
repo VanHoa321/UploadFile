@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Repositories\FileRepositoryInterface;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class FileController extends Controller
 {
@@ -14,15 +16,21 @@ class FileController extends Controller
     }
 
     public function index() {
-        $files = $this->fileRepository->all();
+        $files = $this->fileRepository->file_by_user();
         return view('download', compact('files'));
     }
 
     public function store(Request $request) {
         $request->validate([
             'files.*' => 'file|max:10240',
+            'autoDelete' => 'required|integer|min:0',
         ]);
-    
+
+        $autoDeleteDays = $request->autoDelete;
+        $expirationTime = null;
+        if ($autoDeleteDays > 0) {
+            $expirationTime = now()->addDays($autoDeleteDays);
+        }
         $downloadLinks = [];       
     
         if ($request->hasFile('files')) {
@@ -43,9 +51,11 @@ class FileController extends Controller
     
                 $fileData = [
                     'file_name' => $newFileName,
-                    'file_path' => 'public/img/' . $newFileName,
+                    'file_path' => 'img/' . $newFileName,
                     'file_type' => $uploadedFile->getClientMimeType(),
                     'file_size' => $uploadedFile->getSize(),
+                    'expiration_time' => $expirationTime,
+                    'user_id' => Auth::user()->id,
                 ];
     
                 $fileRecord = $this->fileRepository->create($fileData);
@@ -60,7 +70,6 @@ class FileController extends Controller
         ]);
     }
     
-
     public function download($id) {
         $file = $this->fileRepository->find($id);
         if ($file) {

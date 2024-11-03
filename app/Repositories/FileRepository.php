@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\File;
+use Illuminate\Support\Facades\Auth;
 
 class FileRepository implements FileRepositoryInterface {
     protected $model;
@@ -13,6 +14,9 @@ class FileRepository implements FileRepositoryInterface {
 
     public function all() {
         return $this->model::orderBy('id', 'desc')->get();
+    }
+    public function file_by_user(){
+        return $this->model::where('user_id', Auth::user()->id)->orderBy('id', 'desc')->get();
     }
 
     public function find($id) {

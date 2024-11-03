@@ -12,7 +12,9 @@ class File extends Model
         "file_name",
         "file_path",
         "file_type",
-        "file_size"
+        "file_size",
+        "expiration_time",
+        "user_id"
     ];
     protected $primaryKey = "id";
     protected $table = "files";

@@ -8,8 +8,43 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-
 </head>
+<style>
+    @keyframes slideDown {
+        from {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+    }
+
+    #uploadModal {
+        animation-duration: 0.5s;
+        animation-fill-mode: forwards;
+    }
+
+    #uploadModal.slide-in {
+        animation-name: slideDown;
+    }
+
+    #uploadModal.slide-out {
+        animation-name: slideUp;
+    }
+</style>
 <body class="bg-white text-gray-800">
 
 <header class="sticky top-0 z-10 bg-white border-b shadow">
@@ -25,14 +60,34 @@
                 </button>
             </div>
         </div>
-        <div class="text-center align-self-center" style="margin-right:170px">
+        <div class="text-center align-self-center" style="margin-right:80px">
             <img src="{{asset('img/logo/imgbb.png')}}" alt="">
         </div>
-        <div>
-            <button id="modalOpenBtn" class="flex items-center space-x-1">
-                <i class="fas fa-cloud-upload-alt text-xl"></i>
-                <span class="text-lg">Upload</span>
-            </button>           
+        <div class="flex items-center space-x-4">
+            @auth
+                <button id="modalOpenBtn" class="flex items-center space-x-1">
+                    <i class="fas fa-cloud-upload-alt text-xl"></i>
+                    <span class="text-lg">Upload</span>
+                </button>
+                <div class="relative" x-data="{ open: false }">
+                    <a href="#" @click.prevent="open = !open" class="flex items-center space-x-1">
+                        <span class="text-lg">{{ Auth::user()->user_name }}</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg z-10" 
+                        style="display: none;" x-bind:style="{ display: open ? 'block' : 'none' }">
+                        <a href="{{route('download')}}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">File của tôi</a>
+                        <a href="{{route('logout')}}" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">Đăng xuất</a>
+                    </div>
+                </div>
+            @else
+                <a href="{{ route('login') }}">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                </a>
+                <a href="{{ route('register') }}">
+                    <i class="fas fa-user-plus"></i> Đăng ký
+                </a>
+            @endauth
         </div>
     </div>
 </header>
@@ -62,7 +117,7 @@
                     Tự động xóa ảnh
                 </label>
                 <select class="border p-2 mt-2 mx-auto w-full max-w-xs" id="auto-delete">
-                    <option value="1">Không xóa</option>
+                    <option value="0">Không xóa</option>
                     <option value="1">Sau 1 ngày</option>
                     <option value="7">Sau 7 ngày</option>
                     <option value="30">Sau 30 ngày</option>
@@ -85,22 +140,33 @@
 </footer>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.10.5/cdn.min.js" defer></script>
 <script>
     
     const uploadedFiles = [];
 
     document.getElementById('modalOpenBtn').addEventListener('click', function() {
-        document.getElementById('uploadModal').classList.remove('hidden');
+        const modal = document.getElementById('uploadModal');
+        modal.classList.remove('hidden', 'slide-out');
+        modal.classList.add('slide-in');
+
         document.getElementById('modalOverlay').classList.remove('hidden');
     });
 
     document.getElementById('closeModal').addEventListener('click', function() {
-        document.getElementById('uploadModal').classList.add('hidden');
-        $('#fileList').empty();
-        uploadedFiles.length = 0;
-        document.getElementById('autoDeleteSection').classList.add('hidden');
-        document.getElementById('uploadBtn').classList.add('hidden');
-        document.getElementById('modalOverlay').classList.add('hidden');
+        const modal = document.getElementById('uploadModal');
+        modal.classList.remove('slide-in');
+        modal.classList.add('slide-out');
+
+        setTimeout(function() {
+            modal.classList.add('hidden');
+            $('#fileList').empty();
+            uploadedFiles.length = 0;
+            document.getElementById('autoDeleteSection').classList.add('hidden');
+            document.getElementById('uploadBtn').classList.add('hidden');
+            document.getElementById('modalOverlay').classList.add('hidden');
+            $('#listDownload').empty();
+        }, 500);
     });
 
     $('#fileInput').on('change', handleFiles);
@@ -117,7 +183,6 @@
 
     //Paste files
     document.getElementById('upload').addEventListener('paste', function(event) {
-        // Ngăn chặn hành động mặc định của sự kiện
         event.preventDefault();
         document.getElementById('uploadModal').classList.remove('hidden');
         document.getElementById('modalOverlay').classList.remove('hidden');
