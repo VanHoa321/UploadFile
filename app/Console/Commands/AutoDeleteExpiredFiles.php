@@ -12,7 +12,7 @@ class AutoDeleteExpiredFiles extends Command
 
     public function handle()
     {
-        $expiredFiles = File::where('expiration_time', '<', now()->timezone('Asia/Ho_Chi_Minh'))->get();
+        $expiredFiles = File::where('expiration_time', '<', now())->get();
 
         foreach ($expiredFiles as $file) {
 

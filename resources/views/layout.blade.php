@@ -60,15 +60,27 @@
                 </button>
             </div>
         </div>
-        <div class="text-center align-self-center" style="margin-right:80px">
-            <img src="{{asset('img/logo/imgbb.png')}}" alt="">
-        </div>
+        @if (Auth::user())
+            <div class="text-center align-self-center" style="margin-right:80px">
+                <img src="{{asset('img/logo/imgbb.png')}}" alt="">
+            </div>
+        @elseif (Cookie::get('user_id'))
+            <div class="text-center align-self-center" style="margin-right:-30px">
+                <img src="{{asset('img/logo/imgbb.png')}}" alt="">
+            </div> 
+        @else
+            <div class="text-center align-self-center" style="margin-right:60px">
+                <img src="{{asset('img/logo/imgbb.png')}}" alt="">
+            </div>   
+        @endif
         <div class="flex items-center space-x-4">
-            @auth
+            @if (Cookie::get('user_id'))
                 <button id="modalOpenBtn" class="flex items-center space-x-1">
                     <i class="fas fa-cloud-upload-alt text-xl"></i>
                     <span class="text-lg">Upload</span>
                 </button>
+            @endif
+            @auth
                 <div class="relative" x-data="{ open: false }">
                     <a href="#" @click.prevent="open = !open" class="flex items-center space-x-1">
                         <span class="text-lg">{{ Auth::user()->user_name }}</span>
@@ -105,11 +117,11 @@
         </button>
         <main class="mt-8 text-center"> 
             <label for="fileInput" class="cursor-pointer">
-                <span style="color:#2a80b9" class="fa-7x mt-10 fa-solid fa-cloud-arrow-up my-3"></span>
+                <span id="uploadIcon" style="color:#2a80b9" class="fa-7x mt-10 fa-solid fa-cloud-arrow-up my-3"></span>
                 <input type="file" id="fileInput" name="files[]" multiple class="hidden" />
             </label>
-            <p class="text-2xl font-semi mb-3 text-gray-900 flex flex-wrap justify-center"> Kéo thả hoặc paste (Ctrl + V) ảnh vào đây để upload</p>
-            <p class="text-sm text-gray-500 mb-10">Bạn có thể thêm nhiều dữ liệu nữa từ <a href="#" class="text-blue-500">máy tính của bạn</a> hoặc <a href="#" class="text-blue-500">thêm địa chỉ tài nguyên</a>.</p>   
+            <p id="uploadTitle" class="text-2xl font-semi mb-3 text-gray-900 flex flex-wrap justify-center"> Kéo thả hoặc paste (Ctrl + V) ảnh vào đây để upload</p>
+            <p id="uploadDescription" class="text-sm text-gray-500 mb-10">Bạn có thể thêm nhiều dữ liệu nữa từ <a href="#" class="text-blue-500">máy tính của bạn</a> hoặc <a href="#" class="text-blue-500">thêm địa chỉ tài nguyên</a>.</p>   
             <div id="fileList" class="flex justify-center mt-8 space-x-4 flex-wrap"></div>
             <div id="listDownload" class="flex justify-center mt-8 flex-col"></div>
             <div id="autoDeleteSection" class="mt-4 hidden">
@@ -166,6 +178,9 @@
             document.getElementById('uploadBtn').classList.add('hidden');
             document.getElementById('modalOverlay').classList.add('hidden');
             $('#listDownload').empty();
+            document.getElementById('uploadIcon').outerHTML = '<span id="uploadIcon" style="color:#2a80b9" class="fa-7x mt-10 fa-solid fa-cloud-arrow-up my-3"></span>';
+            document.getElementById('uploadTitle').innerHTML = 'Kéo thả hoặc paste (Ctrl + V) ảnh vào đây để upload';
+            document.getElementById('uploadDescription').innerHTML = 'Bạn có thể thêm nhiều dữ liệu nữa từ <a href="#" class="text-blue-500">máy tính của bạn</a> hoặc <a href="#" class="text-blue-500">thêm địa chỉ tài nguyên</a>.';
         }, 500);
     });
 
@@ -267,7 +282,7 @@
                 </button>
                 <button class="absolute top-4 left-0 bg-white rounded-full w-4 h-4 flex items-center justify-center shadow hover:shadow-md transition-shadow duration-300">
                     <i class="fas fa-pen text-black-200 text-xs"></i>
-                </button>
+                </button>                
             `);
 
             $('#fileList').append(fileDiv);
@@ -341,11 +356,14 @@
             },
             data: formData,
             processData: false,
-            contentType: false,
+            contentType: false,           
             success: function(response) {
                 toastr.success(response.message);
                 $('#fileInput').siblings('i').removeClass('fas fa-images').addClass('fas fa-check text-green-500');
                 $('#fileInput').removeAttr('id');
+                $('#uploadIcon').replaceWith('<span id="uploadIcon" style="color:green" class="fa-7x mt-10 fa-solid fa-check-circle my-3"></span>');
+                $('#uploadTitle').html('Upload xong rồi!');
+                $('#uploadDescription').html('Bạn có thể tạo album mới với các file đã uploaded hoặc <a href="#" class="text-blue-500">đăng nhập để xem các file đã upload</a>.');
                 $('#fileList').children().each(function() {
                     $(this).find('button').remove();
                 });
@@ -368,6 +386,9 @@
             complete: function() {
                 $('#uploadBtn').prop('disabled', false);
                 isUploading = false;
+                $('#fileList').find('.file-item').each(function() {
+                    $(this).find('.uploading-overlay').addClass('hidden');
+                });
             }
         });
     });

@@ -50,15 +50,15 @@
                     Đăng nhập với tài khoản khác
                 </div>
                 <div class="flex justify-center space-x-4">
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded">
+                    <a href="{{ route('facebook.redirect') }}" class="bg-blue-600 text-white px-4 py-2 rounded">
                         <i class="fab fa-facebook-f"></i> Facebook
-                    </button>
-                    <button class="bg-red-600 text-white px-4 py-2 rounded">
+                    </a>
+                    <a href="{{ route('google.redirect') }}" class="bg-red-600 text-white px-4 py-2 rounded">
                         <i class="fab fa-google"></i> Google
-                    </button>
-                    <button class="bg-blue-500 text-white px-4 py-2 rounded">
-                        <i class="fab fa-vk"></i> VK
-                    </button>
+                    </a>
+                    <a href="{{ route('github.redirect') }}" class="bg-blue-500 text-white px-4 py-2 rounded">
+                        <i class="fab fa-github"></i> GitHub
+                    </a>
                 </div>
             </div>
         </div>

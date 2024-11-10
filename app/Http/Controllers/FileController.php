@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Repositories\FileRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 
 class FileController extends Controller
 {
@@ -55,7 +56,7 @@ class FileController extends Controller
                     'file_type' => $uploadedFile->getClientMimeType(),
                     'file_size' => $uploadedFile->getSize(),
                     'expiration_time' => $expirationTime,
-                    'user_id' => Auth::user()->id,
+                    'user_id' => Auth::check() ? Auth::user()->id : Cookie::get('user_id'),
                 ];
     
                 $fileRecord = $this->fileRepository->create($fileData);
